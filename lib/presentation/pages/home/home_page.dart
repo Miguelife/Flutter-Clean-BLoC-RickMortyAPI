@@ -15,12 +15,20 @@ class HomePage extends StatefulWidget {
 // * STATE
 class _HomePageState extends State<HomePage> {
   // * PROPERTIES
+  final ScrollController _scrollController = ScrollController();
   late HomeBloc _bloc;
 
   // * LIFECYCLE
   @override
   void initState() {
     _bloc = BlocProvider.of<HomeBloc>(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent >= _scrollController.position.pixels - 50 &&
+          _bloc.state.status != BlocStatus.loading &&
+          _bloc.state.hasNextPage) {
+        _bloc.add(const HomeLoadCharactersEvent());
+      }
+    });
     super.initState();
   }
 
@@ -42,18 +50,19 @@ class _HomePageState extends State<HomePage> {
         case BlocStatus.initial:
           return _initialBody();
         case BlocStatus.loading:
-          return _loadingBody();
+          return _bloc.state.characters.isEmpty ? _loadingBody() : _charactersListBody();
         case BlocStatus.error:
           return _errorBody();
         case BlocStatus.success:
-          return _successBody();
+          return _charactersListBody();
       }
     });
   }
 
   Widget _initialBody() {
     return Center(
-        child: ElevatedButton(onPressed: () => _bloc.add(HomeLoadCharactersEvent()), child: const Text("LOAD INFO")));
+        child: ElevatedButton(
+            onPressed: () => _bloc.add(const HomeLoadCharactersEvent()), child: const Text("LOAD INFO")));
   }
 
   Widget _loadingBody() {
@@ -64,12 +73,27 @@ class _HomePageState extends State<HomePage> {
     return const Center(child: Text("ERROR"));
   }
 
-  Widget _successBody() {
+  Widget _charactersListBody() {
     return Padding(
-      padding: const EdgeInsets.only(top: 15),
-      child: ListView.builder(
-          itemCount: _bloc.state.characters.length,
-          itemBuilder: (context, index) => _characterTile(_bloc.state.characters[index])),
+        padding: const EdgeInsets.only(top: 15),
+        child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _bloc.state.characters.length + (_bloc.state.status == BlocStatus.loading ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == _bloc.state.characters.length && _bloc.state.status == BlocStatus.loading) {
+                return _loadingMoreCharactersIndicator();
+              }
+              return _characterTile(_bloc.state.characters[index]);
+            }));
+  }
+
+  Widget _loadingMoreCharactersIndicator() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [CircularProgressIndicator()],
+      ),
     );
   }
 

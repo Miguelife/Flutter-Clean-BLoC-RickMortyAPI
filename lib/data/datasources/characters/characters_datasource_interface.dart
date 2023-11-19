@@ -1,5 +1,5 @@
-import '../../../domain/entities/character.dart';
+import '../../../domain/entities/character_page.dart';
 
 abstract class CharactersDatasourceInterface {
-  Future<List<Character>> getCharacters();
+  Future<CharacterPage> getCharacterPage({required int index});
 }
