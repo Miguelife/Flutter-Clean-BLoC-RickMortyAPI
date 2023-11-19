@@ -1,3 +1,4 @@
+import 'package:clean_rick_morty/presentation/pages/detail/detail_builder.dart';
 import 'package:clean_rick_morty/presentation/pages/home/bloc/home_bloc.dart';
 import 'package:clean_rick_morty/core/bloc/bloc_status.dart';
 import 'package:flutter/material.dart';
@@ -35,15 +36,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _body(),
+      body: _bodyByState(),
     );
   }
 
   // * WIDGETS
-  Widget _body() {
-    return _bodyByState();
-  }
-
   Widget _bodyByState() {
     return BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
       switch (state.status) {
@@ -105,10 +102,14 @@ class _HomePageState extends State<HomePage> {
         children: [
           Column(
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                height: MediaQuery.of(context).size.width * 0.75,
-                child: Image.network(character.imageURL),
+              InkWell(
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => DetailBuilder().build(id: character.id))),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  height: MediaQuery.of(context).size.width * 0.75,
+                  child: Image.network(character.imageURL),
+                ),
               ),
               const SizedBox(
                 height: 15,

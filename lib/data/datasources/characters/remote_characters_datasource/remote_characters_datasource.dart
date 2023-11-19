@@ -1,6 +1,8 @@
 import 'package:clean_rick_morty/data/datasources/characters/characters_datasource_interface.dart';
+import 'package:clean_rick_morty/data/dto/characters/character_dto.dart';
 import 'package:clean_rick_morty/data/dto/characters/character_page_dto.dart';
 import 'package:clean_rick_morty/di/dependencies.dart';
+import 'package:clean_rick_morty/domain/entities/character.dart';
 import 'package:clean_rick_morty/domain/entities/character_page.dart';
 import 'package:dio/dio.dart';
 
@@ -10,5 +12,12 @@ class RemoteCharactersDataSource implements CharactersDatasourceInterface {
     Response response = await Dio().get("${Dependencies.baseURL}/character?page=$index");
     final dto = CharacterPageDTO.fromJson(response.data);
     return CharacterPage.from(dto: dto, index: index);
+  }
+
+  @override
+  Future<Character> getCharacter({required int id}) async {
+    Response response = await Dio().get("${Dependencies.baseURL}/character/$id");
+    final dto = CharacterDTO.fromJson(response.data);
+    return Character.from(dto: dto);
   }
 }
